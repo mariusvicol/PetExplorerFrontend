@@ -135,7 +135,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Intent intent = new Intent(MapsActivity.this, MyAnnouncementsActivity.class);
                 startActivity(intent);
 
-            } else if (id == R.id.nav_settings) {
+			} else if (id == R.id.nav_pet_sitting) {
+				Intent intent = new Intent(this, PetSittingActivity.class);
+				startActivity(intent);
+			} else if (id == R.id.nav_settings) {
                 Intent intent = new Intent(this, SettingsGeneralActivity.class);
                 startActivity(intent);
 

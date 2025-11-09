@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="#C2B280"
+	android:padding="16dp">
+
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:id="@+id/titleBar"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintEnd_toEndOf="parent">
+
+		<ImageButton
+			android:id="@+id/btnBackToMap"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:background="@android:color/transparent"
+			android:src="@android:drawable/ic_menu_revert"
+			android:contentDescription="Înapoi"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent" />
+
+		<TextView
+			android:id="@+id/tvTitle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Pet Sitting"
+			android:textSize="22sp"
+			android:textStyle="bold"
+			android:textColor="@android:color/black"
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintEnd_toEndOf="parent" />
+	</androidx.constraintlayout.widget.ConstraintLayout>
+
+	<LinearLayout
+		android:id="@+id/filterRow"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center_vertical"
+		android:paddingTop="8dp"
+		app:layout_constraintTop_toBottomOf="@id/titleBar"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintEnd_toEndOf="parent">
+
+		<EditText
+			android:id="@+id/editLocation"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:hint="Locație"
+			android:background="@drawable/searchbar_custom"
+			android:padding="10dp"/>
+
+		<EditText
+			android:id="@+id/editAvailability"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:layout_marginStart="8dp"
+			android:hint="Disponibilitate"
+			android:background="@drawable/searchbar_custom"
+			android:padding="10dp"/>
+
+		<Button
+			android:id="@+id/btnApplyFilters"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			android:text="Filtrează"
+			android:textColor="@android:color/white"
+			android:background="@drawable/custom_button"/>
+	</LinearLayout>
+
+	<CheckBox
+		android:id="@+id/chkMyPosts"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Doar ofertele mele"
+		app:layout_constraintTop_toBottomOf="@id/filterRow"
+		app:layout_constraintStart_toStartOf="parent"
+		android:layout_marginTop="6dp"/>
+
+	<Button
+		android:id="@+id/btnAddOffer"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:text="Adaugă ofertă"
+		android:textColor="@android:color/white"
+		android:background="@drawable/custom_button2"
+		android:layout_marginTop="8dp"
+		app:layout_constraintTop_toBottomOf="@id/chkMyPosts"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"/>
+
+	<ProgressBar
+		android:id="@+id/progressBar"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		app:layout_constraintTop_toBottomOf="@id/btnAddOffer"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		android:visibility="gone"/>
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/recyclerPetSittingOffers"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_marginTop="8dp"
+		android:scrollbars="vertical"
+		app:layout_constraintTop_toBottomOf="@id/btnAddOffer"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintEnd_toEndOf="parent" />
+
+	<!-- Inline Form (hidden by default) -->
+	<LinearLayout
+		android:id="@+id/formContainer"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:paddingTop="12dp"
+		android:visibility="gone"
+		app:layout_constraintTop_toBottomOf="@id/btnAddOffer"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintEnd_toEndOf="parent">
+
+		<EditText
+			android:id="@+id/editName"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:hint="Nume ofertă"
+			android:background="@drawable/searchbar_custom"
+			android:padding="12dp"/>
+
+		<EditText
+			android:id="@+id/editFormLocation"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:hint="Locație"
+			android:background="@drawable/searchbar_custom"
+			android:padding="12dp"
+			android:layout_marginTop="8dp"/>
+
+		<EditText
+			android:id="@+id/editPhone"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:hint="Telefon"
+			android:inputType="phone"
+			android:background="@drawable/searchbar_custom"
+			android:padding="12dp"
+			android:layout_marginTop="8dp"/>
+
+		<EditText
+			android:id="@+id/editFormAvailability"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:hint="Disponibilitate (ex: seara, weekend)"
+			android:background="@drawable/searchbar_custom"
+			android:padding="12dp"
+			android:layout_marginTop="8dp"/>
+
+		<EditText
+			android:id="@+id/editExperience"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:hint="Experiență"
+			android:background="@drawable/searchbar_custom"
+			android:padding="12dp"
+			android:layout_marginTop="8dp"/>
+
+		<EditText
+			android:id="@+id/editDescription"
+			android:layout_width="match_parent"
+			android:layout_height="120dp"
+			android:hint="Descriere"
+			android:gravity="top"
+			android:background="@drawable/description_input"
+			android:layout_marginTop="8dp"/>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal"
+			android:gravity="end"
+			android:layout_marginTop="12dp">
+
+			<Button
+				android:id="@+id/btnCancelOffer"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Renunță"
+				android:background="@drawable/not_focused_button"
+				android:textColor="@android:color/white"/>
+
+			<Button
+				android:id="@+id/btnSaveOffer"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Salvează"
+				android:layout_marginStart="8dp"
+				android:background="@drawable/custom_button"
+				android:textColor="@android:color/white"/>
+		</LinearLayout>
+	</LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
