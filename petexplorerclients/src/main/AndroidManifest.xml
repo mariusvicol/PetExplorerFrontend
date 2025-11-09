@@ -78,6 +78,11 @@
 
         <activity android:name=".AddAnimalActivity"/>
 
+        <activity
+            android:name=".Verify2FAActivity"
+            android:exported="false"
+            android:label="Verificare 2FA"/>
+
     </application>
 
 </manifest>

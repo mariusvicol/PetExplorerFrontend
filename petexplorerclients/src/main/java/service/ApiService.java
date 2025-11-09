@@ -10,6 +10,8 @@ import domain.PensiuneCanina;
 import domain.Salon;
 import domain.utils.LocatieFavoritaDTO;
 import domain.utils.SearchResultDTO;
+import domain.utils.LoginResponse;
+import domain.utils.Enable2FAResponse;
 import domain.User;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -61,7 +63,19 @@ public interface ApiService {
     );
 
     @POST("/api/users/login")
-    Call<User> login(@Body User loginRequest);
+    Call<LoginResponse> login(@Body User loginRequest);
+
+    @POST("/api/users/google-login")
+    Call<LoginResponse> googleLogin(@Body java.util.Map<String, String> request);
+
+    @POST("/api/users/enable-2fa")
+    Call<Enable2FAResponse> enable2FA(@Body java.util.Map<String, Integer> request);
+
+    @POST("/api/users/verify-2fa-setup")
+    Call<java.util.Map<String, Object>> verify2FASetup(@Body java.util.Map<String, Object> request);
+
+    @POST("/api/users/verify-2fa-login")
+    Call<User> verify2FALogin(@Body java.util.Map<String, Object> request);
 
     @POST("/api/users/register")
     Call<User> register(@Body User registerRequest);

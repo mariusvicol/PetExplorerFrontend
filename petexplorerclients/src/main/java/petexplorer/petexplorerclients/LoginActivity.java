@@ -7,15 +7,30 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import domain.User;
+import domain.utils.LoginResponse;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
 
 public class LoginActivity extends AppCompatActivity {
+    private static final int RC_SIGN_IN = 9001;
     private EditText emailEditText, passwordEditText;
-    private Button loginButton;
+    private Button loginButton, googleSignInButton;
+    private GoogleSignInClient googleSignInClient;
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +40,22 @@ public class LoginActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         loginButton = findViewById(R.id.loginButton);
+        googleSignInButton = findViewById(R.id.googleSignInButton);
+
+        apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);
+
+        // Configure Google Sign-In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("754830909329-mh2hdkceaca5bd097f09feaehdjfgbc7.apps.googleusercontent.com")
+                .requestEmail()
+                .build();
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
+        
+        android.util.Log.d("GoogleSignIn", "Package name: " + getPackageName());
+        android.util.Log.d("GoogleSignIn", "Web Client ID: 754830909329-mh2hdkceaca5bd097f09feaehdjfgbc7.apps.googleusercontent.com");
 
         loginButton.setOnClickListener(v -> login());
+        googleSignInButton.setOnClickListener(v -> signInWithGoogle());
     }
 
     private void login() {
@@ -42,35 +71,148 @@ public class LoginActivity extends AppCompatActivity {
         loginRequest.setEmail(email);
         loginRequest.setPassword(password);
 
-        ApiService apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);
-
-        apiService.login(loginRequest).enqueue(new Callback<User>() {
+        apiService.login(loginRequest).enqueue(new Callback<LoginResponse>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful()) {
-                    User user = response.body();
-                    SharedPreferences prefs = getSharedPreferences("user_data", MODE_PRIVATE);
-                    prefs.edit()
-                            .putInt("user_id", user.getId())
-                            .putString("email", user.getEmail())
-                            .putString("full_name", user.getNume())
-                            .apply();
+                    LoginResponse loginResponse = response.body();
+                    if (loginResponse != null) {
+                        User user = loginResponse.getUser();
+                        Boolean requires2FA = loginResponse.getRequires2FA();
 
-                    Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
-                    startActivity(intent);
-
-                    finish();
+                        if (requires2FA != null && requires2FA) {
+                            // Navigate to 2FA verification
+                            Intent intent = new Intent(LoginActivity.this, Verify2FAActivity.class);
+                            intent.putExtra("email", user.getEmail());
+                            startActivity(intent);
+                        } else {
+                            // Save user data and navigate to MapsActivity
+                            saveUserData(user);
+                            navigateToMaps();
+                        }
+                    }
                 } else {
                     Toast.makeText(LoginActivity.this, "Email sau parola greșita!", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Toast.makeText(LoginActivity.this, "Eroare de rețea!", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    private void signInWithGoogle() {
+        Intent signInIntent = googleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleGoogleSignInResult(task);
+        }
+    }
+
+    private void handleGoogleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            if (account != null) {
+                String idToken = account.getIdToken();
+                if (idToken != null) {
+                    // Send ID token to backend
+                    Map<String, String> request = new HashMap<>();
+                    request.put("idToken", idToken);
+
+                    apiService.googleLogin(request).enqueue(new Callback<LoginResponse>() {
+                        @Override
+                        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                            if (response.isSuccessful()) {
+                                LoginResponse loginResponse = response.body();
+                                if (loginResponse != null) {
+                                    User user = loginResponse.getUser();
+                                    Boolean requires2FA = loginResponse.getRequires2FA();
+
+                                    if (requires2FA != null && requires2FA) {
+                                        // Navigate to 2FA verification
+                                        Intent intent = new Intent(LoginActivity.this, Verify2FAActivity.class);
+                                        intent.putExtra("email", user.getEmail());
+                                        startActivity(intent);
+                                    } else {
+                                        // Save user data and navigate to MapsActivity
+                                        saveUserData(user);
+                                        navigateToMaps();
+                                    }
+                                }
+                            } else {
+                                String errorBody = "Unknown error";
+                                try {
+                                    if (response.errorBody() != null) {
+                                        errorBody = response.errorBody().string();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                Toast.makeText(LoginActivity.this, "Eroare la autentificare Google! " + response.code(), Toast.LENGTH_LONG).show();
+                                android.util.Log.e("GoogleSignIn", "Error: " + response.code() + " - " + errorBody);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<LoginResponse> call, Throwable t) {
+                            Toast.makeText(LoginActivity.this, "Eroare de rețea!", Toast.LENGTH_SHORT).show();
+                            android.util.Log.e("GoogleSignIn", "Network error", t);
+                        }
+                    });
+                } else {
+                    Toast.makeText(LoginActivity.this, "ID token este null!", Toast.LENGTH_SHORT).show();
+                    android.util.Log.e("GoogleSignIn", "ID token is null");
+                }
+            }
+        } catch (ApiException e) {
+            String errorMessage = "Error code: " + e.getStatusCode() + "\n";
+            errorMessage += "Error: " + e.getMessage() + "\n";
+            
+            // Common error codes
+            switch (e.getStatusCode()) {
+                case 10:
+                    errorMessage += "DEVELOPER_ERROR: Check OAuth client configuration:\n";
+                    errorMessage += "- Package name must match: petexplorer.petexplorerclients\n";
+                    errorMessage += "- SHA-1 fingerprint must match\n";
+                    errorMessage += "- OAuth client must be Android type, not 'Installed app'";
+                    break;
+                case 12500:
+                    errorMessage += "SIGN_IN_CANCELLED: User cancelled sign-in";
+                    break;
+                case 7:
+                    errorMessage += "NETWORK_ERROR: Network connection issue";
+                    break;
+                default:
+                    errorMessage += "Unknown error occurred";
+            }
+            
+            Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+            android.util.Log.e("GoogleSignIn", errorMessage, e);
+        }
+    }
+
+    private void saveUserData(User user) {
+        SharedPreferences prefs = getSharedPreferences("user_data", MODE_PRIVATE);
+        prefs.edit()
+                .putInt("user_id", user.getId())
+                .putString("email", user.getEmail())
+                .putString("full_name", user.getNume())
+                .apply();
+    }
+
+    private void navigateToMaps() {
+        Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+        startActivity(intent);
+        finish();
+    }
 }
 
