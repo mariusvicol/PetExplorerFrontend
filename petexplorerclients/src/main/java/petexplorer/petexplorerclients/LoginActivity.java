@@ -81,12 +81,11 @@ public class LoginActivity extends AppCompatActivity {
                         Boolean requires2FA = loginResponse.getRequires2FA();
 
                         if (requires2FA != null && requires2FA) {
-                            // Navigate to 2FA verification
                             Intent intent = new Intent(LoginActivity.this, Verify2FAActivity.class);
                             intent.putExtra("email", user.getEmail());
                             startActivity(intent);
+                            finish();
                         } else {
-                            // Save user data and navigate to MapsActivity
                             saveUserData(user);
                             navigateToMaps();
                         }
@@ -124,7 +123,6 @@ public class LoginActivity extends AppCompatActivity {
             if (account != null) {
                 String idToken = account.getIdToken();
                 if (idToken != null) {
-                    // Send ID token to backend
                     Map<String, String> request = new HashMap<>();
                     request.put("idToken", idToken);
 
@@ -138,12 +136,11 @@ public class LoginActivity extends AppCompatActivity {
                                     Boolean requires2FA = loginResponse.getRequires2FA();
 
                                     if (requires2FA != null && requires2FA) {
-                                        // Navigate to 2FA verification
                                         Intent intent = new Intent(LoginActivity.this, Verify2FAActivity.class);
                                         intent.putExtra("email", user.getEmail());
                                         startActivity(intent);
+                                        finish();
                                     } else {
-                                        // Save user data and navigate to MapsActivity
                                         saveUserData(user);
                                         navigateToMaps();
                                     }
@@ -169,34 +166,29 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    Toast.makeText(LoginActivity.this, "ID token este null!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Autentificarea Google a eșuat. Te rugăm să încerci din nou.", Toast.LENGTH_SHORT).show();
                     android.util.Log.e("GoogleSignIn", "ID token is null");
                 }
             }
         } catch (ApiException e) {
-            String errorMessage = "Error code: " + e.getStatusCode() + "\n";
-            errorMessage += "Error: " + e.getMessage() + "\n";
-            
-            // Common error codes
+            String errorMessage;
+
             switch (e.getStatusCode()) {
                 case 10:
-                    errorMessage += "DEVELOPER_ERROR: Check OAuth client configuration:\n";
-                    errorMessage += "- Package name must match: petexplorer.petexplorerclients\n";
-                    errorMessage += "- SHA-1 fingerprint must match\n";
-                    errorMessage += "- OAuth client must be Android type, not 'Installed app'";
+                    errorMessage = "Configurare incorectă. Te rugăm să contactezi echipa de suport.";
                     break;
                 case 12500:
-                    errorMessage += "SIGN_IN_CANCELLED: User cancelled sign-in";
+                    errorMessage = "Autentificare anulată.";
                     break;
                 case 7:
-                    errorMessage += "NETWORK_ERROR: Network connection issue";
+                    errorMessage = "Eroare de conexiune. Verifică conexiunea la internet.";
                     break;
                 default:
-                    errorMessage += "Unknown error occurred";
+                    errorMessage = "Autentificarea a eșuat. Te rugăm să încerci din nou.";
             }
-            
+
             Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
-            android.util.Log.e("GoogleSignIn", errorMessage, e);
+            android.util.Log.e("GoogleSignIn", "Error code: " + e.getStatusCode() + " - " + e.getMessage(), e);
         }
     }
 

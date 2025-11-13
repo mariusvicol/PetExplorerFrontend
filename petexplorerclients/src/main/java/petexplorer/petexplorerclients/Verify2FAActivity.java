@@ -70,7 +70,6 @@ public class Verify2FAActivity extends AppCompatActivity {
                                 .putString("full_name", user.getNume())
                                 .apply();
 
-                        // Navigate to MapsActivity
                         Intent intent = new Intent(Verify2FAActivity.this, MapsActivity.class);
                         startActivity(intent);
                         finish();
