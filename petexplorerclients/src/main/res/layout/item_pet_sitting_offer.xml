@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_margin="8dp"
+	app:cardElevation="4dp"
+	app:cardUseCompatPadding="true">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:padding="12dp">
+
+		<TextView
+			android:id="@+id/offerTitle"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Titlu"
+			android:textStyle="bold"
+			android:textSize="18sp" />
+
+		<TextView
+			android:id="@+id/offerSubtitle"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Locație"
+			android:textSize="14sp" />
+
+		<TextView
+			android:id="@+id/offerAvailability"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Disponibilitate"
+			android:textSize="14sp" />
+
+		<ImageButton
+			android:id="@+id/btnCall"
+			android:layout_width="40dp"
+			android:layout_height="40dp"
+			android:layout_gravity="end"
+			android:background="@android:color/transparent"
+			android:src="@android:drawable/ic_menu_call"
+			android:contentDescription="Sună" />
+
+	</LinearLayout>
+</androidx.cardview.widget.CardView>
+

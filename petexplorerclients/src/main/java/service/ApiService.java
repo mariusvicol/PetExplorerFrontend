@@ -8,6 +8,7 @@ import domain.Magazin;
 import domain.Parc;
 import domain.PensiuneCanina;
 import domain.Salon;
+import domain.PetSittingOffer;
 import domain.utils.LocatieFavoritaDTO;
 import domain.utils.SearchResultDTO;
 import domain.User;
@@ -88,6 +89,22 @@ public interface ApiService {
 
     @PATCH("api/animale_pierdute/{id}/rezolvat")
     Call<Void> markAsResolved(@Path("id") int id);
+
+    // Pet Sitting Offers
+    @POST("api/petsitting")
+    Call<PetSittingOffer> createPetSittingOffer(@Body PetSittingOffer offer);
+
+    @GET("api/petsitting")
+    Call<List<PetSittingOffer>> getPetSittingOffers(@Query("location") String location, @Query("availability") String availability, @Query("userId") Integer userId);
+
+    @GET("api/petsitting/{id}")
+    Call<PetSittingOffer> getPetSittingOfferById(@Path("id") int id);
+
+    @PUT("api/petsitting/{id}")
+    Call<PetSittingOffer> updatePetSittingOffer(@Path("id") int id, @Body PetSittingOffer offer);
+
+    @DELETE("api/petsitting/{id}")
+    Call<Void> deletePetSittingOffer(@Path("id") int id, @Query("userId") int userId);
 
 
 }

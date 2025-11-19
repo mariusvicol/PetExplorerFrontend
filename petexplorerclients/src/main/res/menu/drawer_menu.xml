@@ -16,6 +16,11 @@
         android:icon="@drawable/ic_dog" />
 
     <item
+        android:id="@+id/nav_pet_sitting"
+        android:title="Pet Sitting"
+        android:icon="@drawable/ic_person" />
+
+    <item
         android:id="@+id/nav_settings"
         android:title="Setări"
         android:icon="@drawable/ic_settings" />
