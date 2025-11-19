@@ -77,6 +77,15 @@
             android:background="@drawable/custom_button"
             android:text="Login"
             android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/googleSignInButton"
+            android:layout_width="268dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/custom_button"
+            android:text="Sign In with Google"
+            android:textColor="@android:color/white" />
     </LinearLayout>
 
 

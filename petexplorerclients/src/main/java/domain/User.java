@@ -12,6 +12,10 @@ public class User implements Serializable {
     private String nume;
 
     private String nrTelefon;
+    private String googleId;
+    private String authProvider;
+    private String totpSecret;
+    private Boolean totpEnabled;
 
     public User() {
     }
@@ -63,6 +67,38 @@ public class User implements Serializable {
 
     public void setNrTelefon(String nrTelefon) {
         this.nrTelefon = nrTelefon;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public String getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(String authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public String getTotpSecret() {
+        return totpSecret;
+    }
+
+    public void setTotpSecret(String totpSecret) {
+        this.totpSecret = totpSecret;
+    }
+
+    public Boolean getTotpEnabled() {
+        return totpEnabled;
+    }
+
+    public void setTotpEnabled(Boolean totpEnabled) {
+        this.totpEnabled = totpEnabled;
     }
 
     @Override
