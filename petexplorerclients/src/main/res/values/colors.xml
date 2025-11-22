@@ -30,4 +30,8 @@
     <color name="searchbar_bg">#FFE8B6</color>
     <color name="searchbar_border">#DAB58B</color>
     <color name="search_text_color">#000000</color>
+
+    <color name="rating_star_filled">#FFC107</color>
+    <color name="rating_star_empty">#E0E0E0</color>
+    <color name="rating_star_background">#D0D0D0</color>
 </resources>

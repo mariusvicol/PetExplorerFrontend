@@ -12,4 +12,16 @@
     <string name="magazine">Petshops</string>
     <string name="parcuri">Parcuri</string>
     <string name="inchide">Inchide</string>
+    <string name="rating_section_title">Recenzii și evaluări</string>
+    <string name="rating_average_placeholder">Fără rating</string>
+    <string name="rating_count_format">(%1$d recenzii)</string>
+    <string name="rating_no_reviews">Încă nu există recenzii pentru această locație.</string>
+    <string name="rating_no_comment">Fără comentarii adăugate.</string>
+    <string name="rating_unknown_user">Utilizator anonim</string>
+    <string name="rating_input_hint">Împărtășește experiența ta (opțional)</string>
+    <string name="rating_save_button">Salvează recenzia</string>
+    <string name="rating_error_select_value">Selectează mai întâi un număr de stele.</string>
+    <string name="rating_submit_success">Recenzia ta a fost salvată!</string>
+    <string name="rating_submit_error">Nu am putut salva recenzia. Mai încearcă.</string>
+    <string name="rating_load_error">Nu am putut încărca recenziile.</string>
 </resources>
