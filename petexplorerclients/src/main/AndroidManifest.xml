@@ -72,6 +72,11 @@
             android:exported="true"
             android:label="Anunturile mele"/>
 
+		<activity
+			android:name=".PetSittingActivity"
+			android:exported="true"
+			android:label="Pet Sitting"/>
+
         <activity android:name=".SettingsGeneralActivity"
             android:exported="true"
             android:label="Setari generale"/>
