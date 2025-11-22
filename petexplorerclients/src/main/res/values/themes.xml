@@ -12,4 +12,15 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
     </style>
+
+    <!-- Custom Rating Bar Styles with Yellow Stars -->
+    <style name="YellowRatingBar" parent="Widget.AppCompat.RatingBar">
+        <item name="colorControlNormal">@color/rating_star_empty</item>
+        <item name="colorControlActivated">@color/rating_star_filled</item>
+    </style>
+
+    <style name="YellowRatingBarSmall" parent="Widget.AppCompat.RatingBar.Small">
+        <item name="colorControlNormal">@color/rating_star_empty</item>
+        <item name="colorControlActivated">@color/rating_star_filled</item>
+    </style>
 </resources>
