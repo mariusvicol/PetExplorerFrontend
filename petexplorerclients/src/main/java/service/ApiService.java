@@ -8,11 +8,14 @@ import domain.Magazin;
 import domain.Parc;
 import domain.PensiuneCanina;
 import domain.Salon;
+import domain.utils.LocationRatingsDTO;
 import domain.PetSittingOffer;
 import domain.utils.LocatieFavoritaDTO;
 import domain.utils.SearchResultDTO;
 import domain.utils.LoginResponse;
 import domain.utils.Enable2FAResponse;
+import domain.utils.RatingRequestDTO;
+import domain.utils.RatingResponseDTO;
 import domain.User;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -104,6 +107,12 @@ public interface ApiService {
     @PATCH("api/animale_pierdute/{id}/rezolvat")
     Call<Void> markAsResolved(@Path("id") int id);
 
+    @POST("/api/ratings")
+    Call<RatingResponseDTO> addOrUpdateRating(@Body RatingRequestDTO ratingRequestDTO);
+
+    @GET("/api/locations/{locationId}/ratings")
+    Call<LocationRatingsDTO> getRatingsForLocation(@Path("locationId") int locationId,
+                                                   @Query("type") String locationType);
     // Pet Sitting Offers
     @POST("api/petsitting")
     Call<PetSittingOffer> createPetSittingOffer(@Body PetSittingOffer offer);
