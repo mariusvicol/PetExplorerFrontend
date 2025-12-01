@@ -8,6 +8,7 @@ import domain.Magazin;
 import domain.Parc;
 import domain.PensiuneCanina;
 import domain.Salon;
+import domain.User;
 import domain.utils.LocationRatingsDTO;
 import domain.PetSittingOffer;
 import domain.utils.LocatieFavoritaDTO;
@@ -16,7 +17,7 @@ import domain.utils.LoginResponse;
 import domain.utils.Enable2FAResponse;
 import domain.utils.RatingRequestDTO;
 import domain.utils.RatingResponseDTO;
-import domain.User;
+import domain.utils.AiDescriptionResponse;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -34,10 +35,13 @@ import retrofit2.http.Query;
 public interface ApiService {
     @GET("api/cabinete")
     Call<List<CabinetVeterinar>> getCabineteVeterinare();
+
     @GET("api/farmacii")
     Call<List<Farmacie>> getFarmacii();
+
     @GET("api/magazine")
     Call<List<Magazin>> getMagazine();
+
     @GET("api/parcuri")
     Call<List<Parc>> getParcuri();
 
@@ -113,6 +117,7 @@ public interface ApiService {
     @GET("/api/locations/{locationId}/ratings")
     Call<LocationRatingsDTO> getRatingsForLocation(@Path("locationId") int locationId,
                                                    @Query("type") String locationType);
+
     // Pet Sitting Offers
     @POST("api/petsitting")
     Call<PetSittingOffer> createPetSittingOffer(@Body PetSittingOffer offer);
@@ -130,4 +135,8 @@ public interface ApiService {
     Call<Void> deletePetSittingOffer(@Path("id") int id, @Query("userId") int userId);
 
 
+    // AI Description
+    @Multipart
+    @POST("python_app/analyze-pet")
+    Call<AiDescriptionResponse> generateAiDescription(@Part MultipartBody.Part file);
 }

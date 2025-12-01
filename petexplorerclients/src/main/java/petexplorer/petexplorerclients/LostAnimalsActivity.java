@@ -8,8 +8,12 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
@@ -26,31 +30,26 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 import org.threeten.bp.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import domain.AnimalPierdut;
 import petexplorer.petexplorerclients.adapters.AnimalAdapter;
 import petexplorer.petexplorerclients.notification.WebSocketStompClientManager;
+import petexplorer.petexplorerclients.utils.ServerConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
-
-// import pentru STOMP
-import ua.naiksoftware.stomp.Stomp;
-import ua.naiksoftware.stomp.StompClient;
-import ua.naiksoftware.stomp.dto.LifecycleEvent;
-import ua.naiksoftware.stomp.dto.StompMessage;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 
 public class LostAnimalsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -60,6 +59,8 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
     private String cazCurent = "pierdut";
     private AnimalAdapter adapter;
     private static final int REQUEST_ADD_ANIMAL = 1001;
+    private final java.util.HashMap<Marker, AnimalPierdut> markerAnimalMap = new java.util.HashMap<>();
+    private final java.util.HashMap<String, Bitmap> imageCache = new java.util.HashMap<>();
 
     private WebSocketStompClientManager stompClientManager;
 
@@ -83,8 +84,17 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new AnimalAdapter(new ArrayList<>(), animal -> {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(animal.getLatitudine(), animal.getLongitudine()), 16));
+            // Move camera to animal location and show InfoWindow
+            LatLng location = new LatLng(animal.getLatitudine(), animal.getLongitudine());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
+
+            // Find and show marker InfoWindow
+            for (java.util.Map.Entry<Marker, AnimalPierdut> entry : markerAnimalMap.entrySet()) {
+                if (entry.getValue().getId().equals(animal.getId())) {
+                    entry.getKey().showInfoWindow();
+                    break;
+                }
+            }
         });
         recyclerView.setAdapter(adapter);
 
@@ -141,6 +151,63 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
         mMap.getUiSettings().setZoomControlsEnabled(true);
         LatLng initialLoc = new LatLng(46.770519, 23.590103);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLoc, 12));
+
+        // Set custom InfoWindowAdapter
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null; // Use default frame
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                View view = LayoutInflater.from(LostAnimalsActivity.this)
+                        .inflate(R.layout.custom_info_window_animal, null);
+
+                TextView tvTitle = view.findViewById(R.id.tvInfoTitle);
+                ImageView ivImage = view.findViewById(R.id.ivInfoImage);
+
+                tvTitle.setText(marker.getTitle());
+
+                // Get animal data from marker
+                AnimalPierdut animal = markerAnimalMap.get(marker);
+                if (animal != null && animal.getPoza() != null && !animal.getPoza().isEmpty()) {
+                    String imageUrl = ServerConfig.BASE_URL + animal.getPoza();
+
+                    // Check if image is cached
+                    if (imageCache.containsKey(imageUrl)) {
+                        ivImage.setImageBitmap(imageCache.get(imageUrl));
+                    } else {
+                        // Load image asynchronously and refresh InfoWindow
+                        ivImage.setImageResource(R.drawable.dog2);
+                        loadImageForMarker(imageUrl, marker);
+                    }
+                } else {
+                    ivImage.setImageResource(R.drawable.dog2);
+                }
+
+                return view;
+            }
+        });
+    }
+
+    private void loadImageForMarker(String imageUrl, Marker marker) {
+        Glide.with(this)
+                .asBitmap()
+                .load(imageUrl)
+                .placeholder(R.drawable.dog2)
+                .error(R.drawable.warning)
+                .into(new com.bumptech.glide.request.target.SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, com.bumptech.glide.request.transition.Transition<? super Bitmap> transition) {
+                        imageCache.put(imageUrl, resource);
+                        // Refresh the info window if it's currently showing
+                        if (marker.isInfoWindowShown()) {
+                            marker.hideInfoWindow();
+                            marker.showInfoWindow();
+                        }
+                    }
+                });
     }
 
     public void loadAnimalePierdute() {
@@ -154,14 +221,29 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
                     Log.d(TAG, "Raspunsul serverului: " + response.body());
                     List<AnimalPierdut> animaleList = response.body();
                     mMap.clear();
+                    markerAnimalMap.clear();
+
                     for (AnimalPierdut animal : animaleList) {
                         if ("pierdut".equals(animal.getTipCaz()) && !animal.getRezolvat()) {
                             LatLng animalLocation = new LatLng(animal.getLatitudine(), animal.getLongitudine());
 
-                            mMap.addMarker(new MarkerOptions()
+                            Marker marker = mMap.addMarker(new MarkerOptions()
                                     .position(animalLocation)
                                     .title(animal.getNumeAnimal())
                                     .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromDrawable(R.drawable.location))));
+
+                            // Store marker and animal data
+                            if (marker != null) {
+                                markerAnimalMap.put(marker, animal);
+
+                                // Preload image for InfoWindow
+                                if (animal.getPoza() != null && !animal.getPoza().isEmpty()) {
+                                    String imageUrl = ServerConfig.BASE_URL + animal.getPoza();
+                                    if (!imageCache.containsKey(imageUrl)) {
+                                        preloadImage(imageUrl);
+                                    }
+                                }
+                            }
                         }
                     }
                     if (!animaleList.isEmpty()) {
@@ -199,13 +281,29 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
                     Log.d(TAG, "Raspunsul serverului: " + response.body());
                     List<AnimalPierdut> animaleList = response.body();
                     mMap.clear();
+                    markerAnimalMap.clear();
+
                     for (AnimalPierdut animal : animaleList) {
                         if ("vazut".equals(animal.getTipCaz()) && !animal.getRezolvat()) {
                             LatLng loc = new LatLng(animal.getLatitudine(), animal.getLongitudine());
-                            mMap.addMarker(new MarkerOptions()
+
+                            Marker marker = mMap.addMarker(new MarkerOptions()
                                     .position(loc)
                                     .title(animal.getNumeAnimal())
                                     .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromDrawable(R.drawable.location))));
+
+                            // Store marker and animal data
+                            if (marker != null) {
+                                markerAnimalMap.put(marker, animal);
+
+                                // Preload image for InfoWindow
+                                if (animal.getPoza() != null && !animal.getPoza().isEmpty()) {
+                                    String imageUrl = ServerConfig.BASE_URL + animal.getPoza();
+                                    if (!imageCache.containsKey(imageUrl)) {
+                                        preloadImage(imageUrl);
+                                    }
+                                }
+                            }
                         }
                     }
                     if (!animaleList.isEmpty()) {
@@ -256,6 +354,20 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
         }
 
         return bitmap;
+    }
+
+    private void preloadImage(String imageUrl) {
+        Glide.with(this)
+                .asBitmap()
+                .load(imageUrl)
+                .placeholder(R.drawable.dog2)
+                .error(R.drawable.warning)
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                        imageCache.put(imageUrl, resource);
+                    }
+                });
     }
 
     private List<AnimalPierdut> sorteazaLista(List<AnimalPierdut> lista) {

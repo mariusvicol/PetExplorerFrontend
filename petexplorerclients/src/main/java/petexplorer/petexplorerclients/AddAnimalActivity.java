@@ -13,8 +13,10 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
-
+import android.widget.Button;
+import android.widget.ProgressBar;
 import androidx.annotation.DrawableRes;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 
@@ -23,7 +25,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
@@ -35,6 +36,7 @@ import domain.AnimalPierdut;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import domain.utils.AiDescriptionResponse;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,7 +46,6 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
 
     private GoogleMap map;
     private LatLng selectedLatLng;
-    private Uri imageUri;
     private static final int REQUEST_IMAGE_PICK = 101;
     private static final int REQUEST_IMAGE_CAPTURE = 102;
     private Uri selectedImageUri;
@@ -69,25 +70,33 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
 
         findViewById(R.id.btnSubmit).setOnClickListener(v -> submitAnimal());
         findViewById(R.id.btnUploadPhoto).setOnClickListener(v -> showImagePickerOptions());
+        findViewById(R.id.btnGenerateAiDescription).setOnClickListener(v -> generateAiDescription());
 
         ImageButton btnBack = findViewById(R.id.btnBackToLostAnimals);
         btnBack.setOnClickListener(v -> {
-            setResult(RESULT_CANCELED); // opțional
+            setResult(RESULT_CANCELED);
             finish();
         });
 
+        // Enable scrolling in description field
+        EditText editDescriere = findViewById(R.id.editDescriere);
+        editDescriere.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            if ((event.getAction() & android.view.MotionEvent.ACTION_MASK) == android.view.MotionEvent.ACTION_UP) {
+                v.getParent().requestDisallowInterceptTouchEvent(false);
+            }
+            return false;
+        });
     }
 
     private void showImagePickerOptions() {
-        String[] options = {"Fă o poză", "Alege din galerie"};
-
-        new android.app.AlertDialog.Builder(this)
-                .setTitle("Încarcă o imagine")
-                .setItems(options, (dialog, which) -> {
+        new AlertDialog.Builder(this)
+                .setTitle("Selectează o opțiune")
+                .setItems(new CharSequence[]{"Galerie", "Cameră"}, (dialog, which) -> {
                     if (which == 0) {
-                        openCamera();
-                    } else {
                         openGallery();
+                    } else {
+                        openCamera();
                     }
                 })
                 .show();
@@ -109,10 +118,12 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_design));
         map = googleMap;
-        LatLng cluj = new LatLng(46.770439, 23.591423);
+
+        // Set Cluj-Napoca as default location
+        LatLng cluj = new LatLng(46.7712, 23.6236);
         map.moveCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(cluj, 13));
+
         map.setOnMapClickListener(latLng -> {
             selectedLatLng = latLng;
             map.clear();
@@ -127,15 +138,15 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        ImageView imagePreview = findViewById(R.id.imagePreview);
-
         if (resultCode == RESULT_OK) {
+            ImageView imagePreview = findViewById(R.id.imagePreview);
+            Button btnGenerateAi = findViewById(R.id.btnGenerateAiDescription);
+
             if (requestCode == REQUEST_IMAGE_PICK && data != null) {
                 selectedImageUri = data.getData();
             } else if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
-                selectedImageUri = data.getData(); // Unele dispozitive returnează thumbnail
+                selectedImageUri = data.getData();
                 if (selectedImageUri == null && data.getExtras() != null) {
-                    // alternativ, creezi un Bitmap din extras și îl salvezi
                     Toast.makeText(this, "Imagine capturată (thumbnail)", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -143,9 +154,8 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
             if (selectedImageUri != null) {
                 imagePreview.setImageURI(selectedImageUri);
                 imagePreview.setVisibility(View.VISIBLE);
+                btnGenerateAi.setVisibility(View.VISIBLE);
                 Toast.makeText(this, "Imagine selectată!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Nu s-a putut obține imaginea", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -246,5 +256,76 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
         }
 
         return bitmap;
+    }
+
+    private void generateAiDescription() {
+        if (selectedImageUri == null) {
+            Toast.makeText(this, "Te rog selectează o imagine mai întâi!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ProgressBar progressBar = findViewById(R.id.progressBarDescription);
+        EditText editDescriere = findViewById(R.id.editDescriere);
+        Button btnSubmit = findViewById(R.id.btnSubmit);
+
+        progressBar.setVisibility(View.VISIBLE);
+        editDescriere.setEnabled(false);
+        btnSubmit.setEnabled(false);
+
+        try {
+            File imageFile = createTempFileFromUri(selectedImageUri);
+            RequestBody requestFile = RequestBody.create(imageFile, MediaType.parse("image/*"));
+            MultipartBody.Part imagePart = MultipartBody.Part.createFormData("file", imageFile.getName(), requestFile);
+
+            ApiService apiService = RetrofitClient.getPythonAiApiService();
+            Call<AiDescriptionResponse> call = apiService.generateAiDescription(imagePart);
+
+            call.enqueue(new Callback<AiDescriptionResponse>() {
+                @Override
+                public void onResponse(Call<AiDescriptionResponse> call, Response<AiDescriptionResponse> response) {
+                    progressBar.setVisibility(View.GONE);
+                    editDescriere.setEnabled(true);
+                    btnSubmit.setEnabled(true);
+
+                    if (response.isSuccessful() && response.body() != null) {
+                        AiDescriptionResponse aiResponse = response.body();
+                        if ("success".equals(aiResponse.getStatus()) && aiResponse.getDescription() != null) {
+                            editDescriere.setText(aiResponse.getDescription());
+                            Toast.makeText(AddAnimalActivity.this, "Descriere generată cu succes!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            String errorMsg = aiResponse.getMessage() != null ? aiResponse.getMessage() : "Eroare necunoscută";
+                            Toast.makeText(AddAnimalActivity.this, "Eroare: " + errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        String errorMsg = "Eroare la generarea descrierii (Cod: " + response.code() + ")";
+                        try {
+                            if (response.errorBody() != null) {
+                                errorMsg += " - " + response.errorBody().string();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        Toast.makeText(AddAnimalActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<AiDescriptionResponse> call, Throwable t) {
+                    progressBar.setVisibility(View.GONE);
+                    editDescriere.setEnabled(true);
+                    btnSubmit.setEnabled(true);
+                    String errorMsg = "Eroare rețea: " + (t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName());
+                    Toast.makeText(AddAnimalActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    t.printStackTrace();
+                }
+            });
+
+        } catch (Exception e) {
+            progressBar.setVisibility(View.GONE);
+            editDescriere.setEnabled(true);
+            btnSubmit.setEnabled(true);
+            e.printStackTrace();
+            Toast.makeText(this, "Eroare la procesarea imaginii", Toast.LENGTH_SHORT).show();
+        }
     }
 }

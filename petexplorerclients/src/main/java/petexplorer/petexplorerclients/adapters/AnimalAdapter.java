@@ -3,6 +3,7 @@ package petexplorer.petexplorerclients.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -10,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
-import org.threeten.bp.format.DateTimeParseException;
 import java.util.Locale;
 
 import com.bumptech.glide.Glide;
@@ -55,6 +55,8 @@ public class AnimalAdapter extends RecyclerView.Adapter<AnimalAdapter.AnimalView
     public static class AnimalViewHolder extends RecyclerView.ViewHolder {
         TextView tvNume, tvData, tvDescriere, tvTelefon, tvRezolvat;
         ImageView imgPoza;
+        ImageButton btnExpandDescriere;
+        boolean isExpanded = false;
 
         public AnimalViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -65,6 +67,7 @@ public class AnimalAdapter extends RecyclerView.Adapter<AnimalAdapter.AnimalView
             tvTelefon = itemView.findViewById(R.id.tvTelefon);
             imgPoza = itemView.findViewById(R.id.imgPoza);
             tvRezolvat = itemView.findViewById(R.id.tvRezolvat);
+            btnExpandDescriere = itemView.findViewById(R.id.btnExpandDescriere);
         }
 
         public void bind(AnimalPierdut animal, OnItemClickListener listener) {
@@ -87,6 +90,23 @@ public class AnimalAdapter extends RecyclerView.Adapter<AnimalAdapter.AnimalView
             tvData.setText(dataFormatted);
             tvDescriere.setText(animal.getDescriere());
             tvTelefon.setText(animal.getNrTelefon());
+
+            // Reset expand state
+            isExpanded = false;
+            tvDescriere.setMaxLines(2);
+            btnExpandDescriere.setRotation(0);
+
+            // Handle expand/collapse button
+            btnExpandDescriere.setOnClickListener(v -> {
+                isExpanded = !isExpanded;
+                if (isExpanded) {
+                    tvDescriere.setMaxLines(Integer.MAX_VALUE);
+                    btnExpandDescriere.setRotation(180);
+                } else {
+                    tvDescriere.setMaxLines(2);
+                    btnExpandDescriere.setRotation(0);
+                }
+            });
 
             if (animal.getPoza() != null && !animal.getPoza().isEmpty()) {
                 String imageUrl = ServerConfig.BASE_URL + animal.getPoza();

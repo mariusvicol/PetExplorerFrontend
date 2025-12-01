@@ -47,20 +47,6 @@
             android:autofillHints="name" />
 
         <EditText
-            android:id="@+id/editDescriere"
-            android:hint="Descriere"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/searchbar_custom"
-            android:textAlignment="center"
-            android:textStyle="bold"
-            android:minHeight="48dp"
-            android:padding="8dp"
-            android:inputType="textMultiLine"
-            android:autofillHints="description" />
-
-        <EditText
             android:id="@+id/editTelefon"
             android:hint="Număr de telefon"
             android:layout_width="match_parent"
@@ -84,6 +70,55 @@
             android:text="Încarcă o poză"
             android:textColor="@color/white" />
 
+        <ImageView
+            android:id="@+id/imagePreview"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:layout_marginTop="8dp"
+            android:contentDescription="Preview imagine animal"/>
+
+        <Button
+            android:id="@+id/btnGenerateAiDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/custom_button2"
+            android:text="✨AI Descriere✨"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <EditText
+                android:id="@+id/editDescriere"
+                android:hint="Descriere"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="120dp"
+                android:minHeight="120dp"
+                android:background="@drawable/searchbar_custom"
+                android:gravity="top|center"
+                android:padding="22dp"
+                android:textStyle="bold"
+                android:inputType="textMultiLine"
+                android:scrollbars="vertical"
+                android:overScrollMode="always"
+                android:scrollbarStyle="insideInset"
+                android:autofillHints="description" />
+
+            <ProgressBar
+                android:id="@+id/progressBarDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
+
         <Button
             android:id="@+id/btnSubmit"
             android:layout_width="261dp"
@@ -92,13 +127,5 @@
             android:background="@drawable/custom_button"
             android:text="Trimite"
             android:textColor="@color/white" />
-
-        <ImageView
-            android:id="@+id/imagePreview"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:visibility="gone"
-            android:layout_marginTop="8dp"/>
     </LinearLayout>
 </ScrollView>

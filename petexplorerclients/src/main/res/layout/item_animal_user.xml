@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="150dp"
+    android:layout_height="wrap_content"
     android:layout_marginTop="24dp"
     android:layout_marginHorizontal="16dp"
     app:cardCornerRadius="12dp"
@@ -12,18 +12,17 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:padding="12dp">
 
         <ImageView
             android:id="@+id/imgPoza"
             android:layout_width="100dp"
-            android:layout_height="0dp"
+            android:layout_height="100dp"
             android:layout_marginEnd="8dp"
             android:scaleType="centerCrop"
             android:src="@drawable/warning"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <View
@@ -45,6 +44,7 @@
             android:textStyle="bold"
             android:fontFamily="@font/playfair_display"
             android:layout_marginStart="12dp"
+            android:layout_marginTop="8dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/verticalDivider"
             app:layout_constraintEnd_toStartOf="@id/tvData"
@@ -64,12 +64,13 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
-            android:id="@+id/tvDescriere"
+            android:id="@+id/tvTelefon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Descriere"
-            android:textColor="@color/text_hint"
+            android:text="Telefon"
+            android:textColor="@color/taupe"
             android:textSize="13sp"
+            android:textStyle="bold"
             android:fontFamily="@font/playfair_display"
             android:layout_marginTop="4dp"
             app:layout_constraintTop_toBottomOf="@id/tvNume"
@@ -77,18 +78,32 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
-            android:id="@+id/tvTelefon"
+            android:id="@+id/tvDescriere"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Telefon"
-            android:textColor="@color/taupe"
-            android:textSize="15sp"
-            android:textStyle="bold"
+            android:text="Descriere"
+            android:textColor="@color/text_hint"
+            android:textSize="12sp"
             android:fontFamily="@font/playfair_display"
-            android:layout_marginTop="4dp"
-            app:layout_constraintTop_toBottomOf="@id/tvDescriere"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="8dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintTop_toBottomOf="@id/tvTelefon"
             app:layout_constraintStart_toStartOf="@id/tvNume"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toStartOf="@id/btnExpandDescriere" />
+
+        <ImageButton
+            android:id="@+id/btnExpandDescriere"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/arrow_down_float"
+            android:contentDescription="Extinde descrierea"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvDescriere"
+            app:layout_constraintBottom_toBottomOf="@id/tvDescriere" />
 
         <Button
             android:id="@+id/btnMarkResolved"
@@ -98,9 +113,10 @@
             android:textColor="@android:color/white"
             android:background="@drawable/green_rounded_button"
             android:textSize="14sp"
-            android:layout_marginTop="6dp"
-            app:layout_constraintTop_toBottomOf="@id/tvTelefon"
-            app:layout_constraintStart_toStartOf="@id/tvTelefon" />
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintTop_toBottomOf="@id/tvDescriere"
+            app:layout_constraintStart_toStartOf="@id/tvNume" />
 
         <TextView
             android:id="@+id/tvRezolvat"
@@ -110,9 +126,10 @@
             android:textColor="#2e7d32"
             android:textStyle="bold"
             android:visibility="gone"
-            android:layout_marginTop="6dp"
-            app:layout_constraintTop_toBottomOf="@id/tvTelefon"
-            app:layout_constraintStart_toStartOf="@id/tvTelefon" />
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintTop_toBottomOf="@id/tvDescriere"
+            app:layout_constraintStart_toStartOf="@id/tvNume" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
