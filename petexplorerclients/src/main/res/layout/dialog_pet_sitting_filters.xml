@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:padding="16dp">
+
+	<TextView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Filtre"
+		android:textStyle="bold"
+		android:textSize="18sp" />
+
+	<EditText
+		android:id="@+id/editFilterLocation"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="12dp"
+		android:hint="Locație"
+		android:background="@drawable/searchbar_custom"
+		android:padding="10dp" />
+
+	<EditText
+		android:id="@+id/editFilterAvailability"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="8dp"
+		android:hint="Disponibilitate"
+		android:background="@drawable/searchbar_custom"
+		android:padding="10dp" />
+
+	<CheckBox
+		android:id="@+id/chkFilterMyPosts"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="8dp"
+		android:text="Doar ofertele mele" />
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="end"
+		android:layout_marginTop="16dp">
+
+		<Button
+			android:id="@+id/btnCancelFilters"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Renunță" />
+
+		<Button
+			android:id="@+id/btnApplyFilters"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			android:text="Aplică"
+			android:background="@drawable/custom_button"
+			android:textColor="@android:color/white" />
+	</LinearLayout>
+
+</LinearLayout>
+
+

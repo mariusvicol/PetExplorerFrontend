@@ -34,13 +34,13 @@ public class PetSittingActivity extends AppCompatActivity implements PetSittingO
 
 	private RecyclerView recyclerView;
 	private PetSittingOfferAdapter adapter;
-	private EditText locationFilterEdit;
-	private EditText availabilityFilterEdit;
-	private Button filterButton;
 	private Button addButton;
 	private ProgressBar progressBar;
 	private ApiService api;
-	private CheckBox myPostsCheck;
+
+	private String locationFilter;
+	private String availabilityFilter;
+	private boolean myPostsOnly;
 
 	// Inline form views
 	private LinearLayout formContainer;
@@ -60,17 +60,16 @@ public class PetSittingActivity extends AppCompatActivity implements PetSittingO
 		ImageButton backBtn = findViewById(R.id.btnBackToMap);
 		backBtn.setOnClickListener(v -> finish());
 
+		ImageButton filterIcon = findViewById(R.id.btnOpenFilters);
+		filterIcon.setOnClickListener(v -> openFilterDialog());
+
 		recyclerView = findViewById(R.id.recyclerPetSittingOffers);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		adapter = new PetSittingOfferAdapter(new ArrayList<>(), this);
 		recyclerView.setAdapter(adapter);
 
-		locationFilterEdit = findViewById(R.id.editLocation);
-		availabilityFilterEdit = findViewById(R.id.editAvailability);
-		filterButton = findViewById(R.id.btnApplyFilters);
 		addButton = findViewById(R.id.btnAddOffer);
 		progressBar = findViewById(R.id.progressBar);
-		myPostsCheck = findViewById(R.id.chkMyPosts);
 
 		formContainer = findViewById(R.id.formContainer);
 		nameEdit = findViewById(R.id.editName);
@@ -82,8 +81,6 @@ public class PetSittingActivity extends AppCompatActivity implements PetSittingO
 		saveBtn = findViewById(R.id.btnSaveOffer);
 		cancelBtn = findViewById(R.id.btnCancelOffer);
 
-		filterButton.setOnClickListener(v -> loadOffers());
-		myPostsCheck.setOnCheckedChangeListener((buttonView, isChecked) -> loadOffers());
 		addButton.setOnClickListener(v -> toggleForm(true));
 		cancelBtn.setOnClickListener(v -> toggleForm(false));
 		saveBtn.setOnClickListener(v -> saveOffer());
@@ -99,12 +96,10 @@ public class PetSittingActivity extends AppCompatActivity implements PetSittingO
 
 	private void loadOffers() {
 		showLoading(true);
-		String location = locationFilterEdit.getText() != null ? locationFilterEdit.getText().toString() : "";
-		String availability = availabilityFilterEdit.getText() != null ? availabilityFilterEdit.getText().toString() : "";
-		if (TextUtils.isEmpty(location)) location = null;
-		if (TextUtils.isEmpty(availability)) availability = null;
+		String location = !TextUtils.isEmpty(locationFilter) ? locationFilter : null;
+		String availability = !TextUtils.isEmpty(availabilityFilter) ? availabilityFilter : null;
 
-		Integer userIdFilter = myPostsCheck.isChecked() ? currentUserId : null;
+		Integer userIdFilter = myPostsOnly ? currentUserId : null;
 		api.getPetSittingOffers(location, availability, userIdFilter).enqueue(new Callback<List<PetSittingOffer>>() {
 			@Override
 			public void onResponse(Call<List<PetSittingOffer>> call, Response<List<PetSittingOffer>> response) {
@@ -228,6 +223,42 @@ public class PetSittingActivity extends AppCompatActivity implements PetSittingO
 
 		ImageButton closeBtn = dialogView.findViewById(R.id.btnCloseDialog);
 		closeBtn.setOnClickListener(v -> dialog.dismiss());
+
+		dialog.show();
+	}
+
+	private void openFilterDialog() {
+		View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_pet_sitting_filters, null);
+
+		EditText locationEdit = dialogView.findViewById(R.id.editFilterLocation);
+		EditText availabilityEdit = dialogView.findViewById(R.id.editFilterAvailability);
+		CheckBox myPostsCheck = dialogView.findViewById(R.id.chkFilterMyPosts);
+		Button cancelBtn = dialogView.findViewById(R.id.btnCancelFilters);
+		Button applyBtn = dialogView.findViewById(R.id.btnApplyFilters);
+
+		// Pre-fill with current values
+		if (!TextUtils.isEmpty(locationFilter)) {
+			locationEdit.setText(locationFilter);
+		}
+		if (!TextUtils.isEmpty(availabilityFilter)) {
+			availabilityEdit.setText(availabilityFilter);
+		}
+		myPostsCheck.setChecked(myPostsOnly);
+
+		AlertDialog dialog = new AlertDialog.Builder(this)
+				.setView(dialogView)
+				.create();
+
+		cancelBtn.setOnClickListener(v -> dialog.dismiss());
+
+		applyBtn.setOnClickListener(v -> {
+			locationFilter = locationEdit.getText() != null ? locationEdit.getText().toString().trim() : null;
+			availabilityFilter = availabilityEdit.getText() != null ? availabilityEdit.getText().toString().trim() : null;
+			myPostsOnly = myPostsCheck.isChecked();
+
+			dialog.dismiss();
+			loadOffers();
+		});
 
 		dialog.show();
 	}
