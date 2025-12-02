@@ -26,6 +26,17 @@
 			app:layout_constraintTop_toTopOf="parent"
 			app:layout_constraintBottom_toBottomOf="parent" />
 
+		<ImageButton
+			android:id="@+id/btnOpenFilters"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:background="@android:color/transparent"
+			android:src="@android:drawable/ic_menu_manage"
+			android:contentDescription="Filtre"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent" />
+
 		<TextView
 			android:id="@+id/tvTitle"
 			android:layout_width="wrap_content"
@@ -36,58 +47,11 @@
 			android:textColor="@android:color/black"
 			app:layout_constraintTop_toTopOf="parent"
 			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintEnd_toEndOf="parent" />
+			app:layout_constraintStart_toEndOf="@id/btnBackToMap"
+			app:layout_constraintEnd_toStartOf="@id/btnOpenFilters"
+			android:layout_marginStart="8dp"
+			android:layout_marginEnd="8dp" />
 	</androidx.constraintlayout.widget.ConstraintLayout>
-
-	<LinearLayout
-		android:id="@+id/filterRow"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:orientation="horizontal"
-		android:gravity="center_vertical"
-		android:paddingTop="8dp"
-		app:layout_constraintTop_toBottomOf="@id/titleBar"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintEnd_toEndOf="parent">
-
-		<EditText
-			android:id="@+id/editLocation"
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:hint="Locație"
-			android:background="@drawable/searchbar_custom"
-			android:padding="10dp"/>
-
-		<EditText
-			android:id="@+id/editAvailability"
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:layout_marginStart="8dp"
-			android:hint="Disponibilitate"
-			android:background="@drawable/searchbar_custom"
-			android:padding="10dp"/>
-
-		<Button
-			android:id="@+id/btnApplyFilters"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginStart="8dp"
-			android:text="Filtrează"
-			android:textColor="@android:color/white"
-			android:background="@drawable/custom_button"/>
-	</LinearLayout>
-
-	<CheckBox
-		android:id="@+id/chkMyPosts"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:text="Doar ofertele mele"
-		app:layout_constraintTop_toBottomOf="@id/filterRow"
-		app:layout_constraintStart_toStartOf="parent"
-		android:layout_marginTop="6dp"/>
 
 	<Button
 		android:id="@+id/btnAddOffer"
@@ -96,8 +60,8 @@
 		android:text="Adaugă ofertă"
 		android:textColor="@android:color/white"
 		android:background="@drawable/custom_button2"
-		android:layout_marginTop="8dp"
-		app:layout_constraintTop_toBottomOf="@id/chkMyPosts"
+		android:layout_marginTop="12dp"
+		app:layout_constraintTop_toBottomOf="@id/titleBar"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"/>
 
