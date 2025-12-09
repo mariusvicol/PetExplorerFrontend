@@ -17,6 +17,7 @@ import domain.utils.Enable2FAResponse;
 import domain.utils.RatingRequestDTO;
 import domain.utils.RatingResponseDTO;
 import domain.User;
+import domain.utils.UserLocationDTO;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -129,5 +130,7 @@ public interface ApiService {
     @DELETE("api/petsitting/{id}")
     Call<Void> deletePetSittingOffer(@Path("id") int id, @Query("userId") int userId);
 
+    @PUT("api/user_locations/{user_id}")
+    Call<Void> updateUserLocation(@Path("user_id") int userId, @Body UserLocationDTO location);
 
 }
