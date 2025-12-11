@@ -10,6 +10,7 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -28,12 +29,17 @@ import android.widget.Button;
 
 import com.google.android.gms.common.api.Api;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnSuccessListener;
 import android.location.Location;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.Priority;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -58,6 +64,7 @@ import domain.Salon;
 import domain.utils.CustomInfoWindowData;
 import domain.utils.LocatieFavoritaDTO;
 import domain.utils.SearchResultDTO;
+import domain.utils.UserLocationDTO;
 import petexplorer.petexplorerclients.databinding.ActivityMapsBinding;
 import petexplorer.petexplorerclients.notification.WebSocketStompClientManager;
 import retrofit2.Call;
@@ -74,6 +81,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button filterButton;
     private final int FINE_PERMISSION_CODE = 1;
     Location currentLocation;
+    private LocationCallback locationCallback;
+    private LocationRequest locationRequest;
     FusedLocationProviderClient fusedLocationProviderClient;
 
     private Map<String, List<Integer>> favoritePlaces = new HashMap<>();
@@ -1001,6 +1010,53 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 16));
+    }
+
+    private void sendLocationToServer(Location location) {
+        if (currentUserId == -1) {
+            return;
+        }
+
+        UserLocationDTO locationDTO = new UserLocationDTO(location.getLatitude(), location.getLongitude());
+        ApiService apiService = RetrofitClient.getApiService();
+        apiService.updateUserLocation(currentUserId, locationDTO).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "Locația a fost trimisă cu succes la server.");
+                    stompClient
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.d(TAG, "Eroare la trimiterea locației la server: " + t.getMessage());
+            }
+        });
+    }
+
+    private void setupLocationUpdates() {
+        locationRequest = new LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60000) // check interval (1 minute)
+                .setMinUpdateDistanceMeters(500)
+                .setWaitForAccurateLocation(false)
+                .build();
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    // update location
+                    currentLocation = location;
+
+                    // send location to server
+                    sendLocationToServer(location);
+                    Log.d(TAG, "Locație nouă detectată (peste 500m): " + location.getLatitude() + ", " + location.getLongitude());
+                }
+            }
+        };
     }
 
 }
