@@ -14,7 +14,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import androidx.annotation.DrawableRes;
 import androidx.appcompat.app.AppCompatActivity;
@@ -45,13 +45,15 @@ import java.util.stream.Collectors;
 import domain.AnimalPierdut;
 import petexplorer.petexplorerclients.adapters.AnimalAdapter;
 import petexplorer.petexplorerclients.notification.WebSocketStompClientManager;
+import petexplorer.petexplorerclients.utils.GlobalErrorBus;
 import petexplorer.petexplorerclients.utils.ServerConfig;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
 
-public class LostAnimalsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class LostAnimalsActivity extends BaseActivity
+        implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private RecyclerView recyclerView;
@@ -69,8 +71,10 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lost_animals);
 
-        stompClientManager = WebSocketStompClientManager.getInstance(this);
-        stompClientManager.setOnAnimalReceivedListener(animal -> {
+        stompClientManager = WebSocketStompClientManager
+                .getInstance(this);
+        stompClientManager
+                .setOnAnimalReceivedListener(animal -> {
             runOnUiThread(() -> {
                 if ("pierdut".equals(cazCurent)) {
                     loadAnimalePierdute();
@@ -84,11 +88,9 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new AnimalAdapter(new ArrayList<>(), animal -> {
-            // Move camera to animal location and show InfoWindow
             LatLng location = new LatLng(animal.getLatitudine(), animal.getLongitudine());
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 16));
 
-            // Find and show marker InfoWindow
             for (java.util.Map.Entry<Marker, AnimalPierdut> entry : markerAnimalMap.entrySet()) {
                 if (entry.getValue().getId().equals(animal.getId())) {
                     entry.getKey().showInfoWindow();
@@ -256,15 +258,12 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
                                     .collect(Collectors.toList()))
                     );
 
-                } else {
-                    Toast.makeText(LostAnimalsActivity.this, "Eroare la obținerea animalelor pierdute", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<AnimalPierdut>> call, Throwable t) {
                 Log.e(TAG, "Eroare la conectarea la server: ", t);
-                Toast.makeText(LostAnimalsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -316,15 +315,12 @@ public class LostAnimalsActivity extends AppCompatActivity implements OnMapReady
                                     .collect(Collectors.toList()))
                     );
 
-                } else {
-                    Toast.makeText(LostAnimalsActivity.this, "Eroare la obținerea animalelor vazute", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<AnimalPierdut>> call, Throwable t) {
                 Log.e(TAG, "Eroare la conectarea la server: ", t);
-                Toast.makeText(LostAnimalsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
             }
         });
     }

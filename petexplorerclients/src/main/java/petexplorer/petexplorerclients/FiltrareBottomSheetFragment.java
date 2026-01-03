@@ -13,7 +13,7 @@ import androidx.appcompat.widget.SearchView;
 
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -68,7 +68,6 @@ public class FiltrareBottomSheetFragment extends BottomSheetDialogFragment {
         resultsRV.setLayoutManager(new LinearLayoutManager(getContext()));
 
         SearchAdapter adapter = new SearchAdapter(new ArrayList<>(), item -> {
-            Toast.makeText(getContext(), "Ai selectat: " + item.getTitle(), Toast.LENGTH_SHORT).show();
 
             MapsActivity mapsActivity = (MapsActivity) getActivity();
             if (mapsActivity != null) {
@@ -113,7 +112,6 @@ public class FiltrareBottomSheetFragment extends BottomSheetDialogFragment {
 
 
         filterMagazineButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Filtrare 1 activata: Magazine Veterinare", Toast.LENGTH_SHORT).show();
             MapsActivity mapsActivity = (MapsActivity) getActivity();
             if (mapsActivity != null) {
                 mapsActivity.loadMagazine();
@@ -123,7 +121,7 @@ public class FiltrareBottomSheetFragment extends BottomSheetDialogFragment {
 
 
         filterFarmaciiButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Filtrare 2 activată: Farmacii veterinare", Toast.LENGTH_SHORT).show();
+
              MapsActivity mapsActivity = (MapsActivity) getActivity();
             if (mapsActivity != null) {
                 mapsActivity.loadFarmaciiVeterinare();
@@ -133,7 +131,7 @@ public class FiltrareBottomSheetFragment extends BottomSheetDialogFragment {
 
 
         filterCabineteButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Filtrare 5 activată: Cabinete", Toast.LENGTH_SHORT).show();
+
             MapsActivity mapsActivity = (MapsActivity) getActivity();
             if (mapsActivity != null) {
                 mapsActivity.loadVeterinaryOffices();
@@ -142,7 +140,7 @@ public class FiltrareBottomSheetFragment extends BottomSheetDialogFragment {
         });
 
         filterParcuriButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Filtrare 6 activată: Parcuri", Toast.LENGTH_SHORT).show();
+
             MapsActivity mapsActivity = (MapsActivity) getActivity();
             if (mapsActivity != null) {
                 mapsActivity.loadParcuri();
@@ -151,7 +149,7 @@ public class FiltrareBottomSheetFragment extends BottomSheetDialogFragment {
         });
 
         filterPensiuniButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Filtrare 7 activata: PensiuniCanine", Toast.LENGTH_SHORT).show();
+
             MapsActivity mapsActivity = (MapsActivity) getActivity();
 
             if (mapsActivity != null) {
@@ -161,7 +159,7 @@ public class FiltrareBottomSheetFragment extends BottomSheetDialogFragment {
         });
 
         filterSaloaneButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Filtrare 8 activata: Saloane", Toast.LENGTH_SHORT).show();
+
             MapsActivity mapsActivity = (MapsActivity) getActivity();
 
             if (mapsActivity != null) {
@@ -217,7 +215,6 @@ public class FiltrareBottomSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onFailure(Call<List<SearchResultDTO>> call, Throwable t) {
                 Log.e("ERROR", "Eroare la conectarea cu serverul: " + t);
-                Toast.makeText(getContext(), "Eroare la retea", Toast.LENGTH_SHORT).show();
             }
         });
     }

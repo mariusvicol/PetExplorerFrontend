@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +28,7 @@ import domain.utils.LocatieFavoritaDTO;
 import domain.utils.RatingRequestDTO;
 import domain.utils.RatingResponseDTO;
 import petexplorer.petexplorerclients.adapters.RatingAdapter;
+import petexplorer.petexplorerclients.utils.GlobalErrorBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -103,7 +103,6 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if (response.isSuccessful()) {
-                                Toast.makeText(getContext(), "Locație adăugată la favorite cu succes!", Toast.LENGTH_SHORT).show();
                                 data.setChecked(true);
 
                                 if (favoriteChangedListener != null) {
@@ -114,7 +113,6 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
 
                         @Override
                         public void onFailure(Call<Void> call, Throwable t) {
-                            Toast.makeText(getContext(), "Eroare la salvare", Toast.LENGTH_SHORT).show();
                             checkBox.setChecked(false);
                         }
                     });
@@ -126,7 +124,6 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if (response.isSuccessful()) {
-                                Toast.makeText(getContext(), "Locație ștearsă de la favorite cu succes!", Toast.LENGTH_SHORT).show();
                                 data.setChecked(false);
 
                                 if (favoriteChangedListener != null) {
@@ -137,7 +134,6 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
 
                         @Override
                         public void onFailure(Call<Void> call, Throwable t) {
-                            Toast.makeText(getContext(), "Eroare la ștergere: ", Toast.LENGTH_SHORT).show();
                             checkBox.setChecked(false);
                         }
                     });
@@ -163,8 +159,6 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
 
                 if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
                     startActivity(intent);
-                } else {
-                    Toast.makeText(getContext(), "Google Maps nu este instalat.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -210,8 +204,6 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     applyRatings(response.body());
-                } else {
-                    Toast.makeText(getContext(), getString(R.string.rating_load_error), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -221,7 +213,6 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
                 if (!isAdded()) {
                     return;
                 }
-                Toast.makeText(getContext(), getString(R.string.rating_load_error), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -280,13 +271,11 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
         }
 
         if (userId == null || userId < 0) {
-            Toast.makeText(getContext(), getString(R.string.rating_submit_error), Toast.LENGTH_SHORT).show();
             return;
         }
 
         int selectedRating = Math.round(userRatingBar.getRating());
         if (selectedRating < 1) {
-            Toast.makeText(getContext(), getString(R.string.rating_error_select_value), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -311,10 +300,9 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
                 }
 
                 if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), getString(R.string.rating_submit_success), Toast.LENGTH_SHORT).show();
                     loadRatings();
                 } else {
-                    Toast.makeText(getContext(), getString(R.string.rating_submit_error), Toast.LENGTH_SHORT).show();
+                    GlobalErrorBus.postError("Recenzia nu a putut fi incarcata!");
                 }
             }
 
@@ -324,7 +312,7 @@ public class PlaceBottomSheet extends BottomSheetDialogFragment {
                 if (!isAdded()) {
                     return;
                 }
-                Toast.makeText(getContext(), getString(R.string.rating_submit_error), Toast.LENGTH_SHORT).show();
+                GlobalErrorBus.postError("Recenzia nu a putut fi incarcata!");
             }
         });
     }

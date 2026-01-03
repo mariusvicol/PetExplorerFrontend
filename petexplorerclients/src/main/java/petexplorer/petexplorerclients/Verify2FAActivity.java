@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,12 +12,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import domain.User;
+import petexplorer.petexplorerclients.utils.GlobalErrorBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
 
-public class Verify2FAActivity extends AppCompatActivity {
+public class Verify2FAActivity extends BaseActivity {
     private EditText codeEditText;
     private Button verifyButton;
     private String userEmail;
@@ -31,7 +31,7 @@ public class Verify2FAActivity extends AppCompatActivity {
 
         userEmail = getIntent().getStringExtra("email");
         if (userEmail == null || userEmail.isEmpty()) {
-            Toast.makeText(this, "Eroare: Email lipsă!", Toast.LENGTH_SHORT).show();
+            GlobalErrorBus.postError("Eroare: nu s-a primit email-ul!");
             finish();
             return;
         }
@@ -48,7 +48,7 @@ public class Verify2FAActivity extends AppCompatActivity {
         String code = codeEditText.getText().toString().trim();
 
         if (code.isEmpty() || code.length() != 6) {
-            Toast.makeText(this, "Introdu codul de 6 cifre!", Toast.LENGTH_SHORT).show();
+           GlobalErrorBus.postError("Cod 2FA invalid!");
             return;
         }
 
@@ -75,14 +75,12 @@ public class Verify2FAActivity extends AppCompatActivity {
                         finish();
                     }
                 } else {
-                    Toast.makeText(Verify2FAActivity.this, "Cod 2FA incorect!", Toast.LENGTH_SHORT).show();
+                    GlobalErrorBus.postError("Cod incorect");
                 }
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Toast.makeText(Verify2FAActivity.this, "Eroare de rețea!", Toast.LENGTH_SHORT).show();
-            }
+            public void onFailure(Call<User> call, Throwable t) {}
         });
     }
 }

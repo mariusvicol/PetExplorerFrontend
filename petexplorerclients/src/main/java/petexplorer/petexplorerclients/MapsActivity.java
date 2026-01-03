@@ -22,7 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import android.Manifest;
 import android.widget.Button;
 
@@ -60,12 +60,13 @@ import domain.utils.LocatieFavoritaDTO;
 import domain.utils.SearchResultDTO;
 import petexplorer.petexplorerclients.databinding.ActivityMapsBinding;
 import petexplorer.petexplorerclients.notification.WebSocketStompClientManager;
+import petexplorer.petexplorerclients.utils.GlobalErrorBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private int currentUserId;
@@ -127,11 +128,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 startActivity(intent);
 
             } else if (id == R.id.nav_favorites) {
-                Toast.makeText(this, "Favorite", Toast.LENGTH_SHORT).show();
                 loadFavLocationsForUser();
 
             } else if (id == R.id.nav_lost_pets) {
-                Toast.makeText(this, "Anunțurile mele", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MapsActivity.this, MyAnnouncementsActivity.class);
                 startActivity(intent);
 
@@ -143,7 +142,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 startActivity(intent);
 
             } else if (id == R.id.nav_logout) {
-                Toast.makeText(this, "Delogare", Toast.LENGTH_SHORT).show();
                 finish();
             }
             drawerLayout.closeDrawers();
@@ -165,7 +163,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             startActivity(intent);
         });
     }
-
 
     private void showBottomSheet() {
         FiltrareBottomSheetFragment bottomSheet = new FiltrareBottomSheetFragment();
@@ -208,8 +205,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     mMap.addMarker(markerCustom.title("Locația curentă"));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-                } else {
-                    Toast.makeText(MapsActivity.this, "Locația curentă nu poate fi obținută", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -241,7 +236,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mMap.setMyLocationEnabled(true);
                 }
             } else {
-                Toast.makeText(this, "Permisiunea de locație este necesară", Toast.LENGTH_SHORT).show();
+                GlobalErrorBus.postError("Eroare la permisiunea de acces la locația");
             }
         }
     }
@@ -325,14 +320,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 } else {
                     Log.e(TAG, "Eroare răspuns server: " + response.code()); // Log pentru codul de răspuns al serverului
-                    Toast.makeText(MapsActivity.this, "Eroare la obținerea cabinetelor veterinare", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<CabinetVeterinar>> call, Throwable t) {
                 Log.e(TAG, "Eroare la conectarea la server: ", t);
-                Toast.makeText(MapsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -415,14 +408,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 } else {
                     Log.e(TAG, "Eroare răspuns server: " + response.code());
-                    Toast.makeText(MapsActivity.this, "Eroare la obținerea pensiunilor", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<PensiuneCanina>> call, Throwable t) {
                 Log.e(TAG, "Eroare la conectarea la server: ", t);
-                Toast.makeText(MapsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
             }
         });
      }
@@ -505,14 +496,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                      }
                  } else {
                      Log.e(TAG, "Eroare răspuns server: " + response.code());
-                     Toast.makeText(MapsActivity.this, "Eroare la obținerea saloanelor", Toast.LENGTH_SHORT).show();
                  }
              }
 
              @Override
              public void onFailure(Call<List<Salon>> call, Throwable t) {
                  Log.e(TAG, "Eroare la conectarea la server: ", t);
-                 Toast.makeText(MapsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
              }
          });
      }
@@ -591,7 +580,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 } else {
                     Log.e(TAG, "Eroare raspuns server: " + response.code());
-                    Toast.makeText(MapsActivity.this, "Eroare la obtinerea magazinelor veterinare", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -599,7 +587,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onFailure(Call<List<Magazin>> call, Throwable t) {
                 Log.e(TAG, "Eroare la conectarea la server: ", t);
-                Toast.makeText(MapsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -678,14 +665,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 } else {
                     Log.e(TAG, "Eroare raspuns server: " + response.code());
-                    Toast.makeText(MapsActivity.this, "Eroare la obtinerea farmaciilor veterinare", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<Farmacie>> call, Throwable t) {
                 Log.e(TAG, "Eroare la conectarea la server: ", t);
-                Toast.makeText(MapsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -764,14 +749,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 } else {
                     Log.e(TAG, "Eroare raspuns server: " + response.code());
-                    Toast.makeText(MapsActivity.this, "Eroare la obținerea parcurilor", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<Parc>> call, Throwable t) {
                 Log.e(TAG, "Eroare la conectarea la server: ", t);
-                Toast.makeText(MapsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -807,7 +790,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onFailure(Call<List<LocatieFavoritaDTO>> call, Throwable t) {
                 Log.e(TAG, "Eroare la conectarea la server: ", t);
-                Toast.makeText(MapsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -898,7 +880,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onFailure(Call<List<LocatieFavoritaDTO>> call, Throwable t) {
                 Log.e(TAG, "Eroare la conectarea la server: ", t);
-                Toast.makeText(MapsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -918,8 +899,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (mapFragment != null) {
                     mapFragment.getMapAsync(MapsActivity.this);
                 }
-            } else {
-                Toast.makeText(MapsActivity.this, "Nu s-a putut obtine locatia curenta", Toast.LENGTH_SHORT).show();
             }
         });
 

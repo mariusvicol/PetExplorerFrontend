@@ -6,17 +6,18 @@ import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import domain.User;
+import petexplorer.petexplorerclients.utils.GlobalErrorBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends BaseActivity {
     protected Button registerButton;
     protected EditText emailEditText, nameEditText, phoneEditText, passwordEditText, retryPasswordEditText;
 
@@ -39,7 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void register() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             if(emailEditText.getText().isEmpty() || passwordEditText.getText().isEmpty() || nameEditText.getText().isEmpty() || phoneEditText.getText().isEmpty()){
-                Toast.makeText(RegisterActivity.this, "Eroare inregistrare! Fieldurile nu pot fi goale!", Toast.LENGTH_SHORT).show();
+                GlobalErrorBus.postError("Toate câmpurile trebuie completate!");
             }else{
                 if(phoneEditText.getText().length()>9){
                     ApiService apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);
@@ -62,18 +63,16 @@ public class RegisterActivity extends AppCompatActivity {
                                     Intent intent = new Intent(RegisterActivity.this, MapsActivity.class);
                                     startActivity(intent);
                                     finish();
-                                } else {
-                                    Toast.makeText(RegisterActivity.this, "User deja existent!", Toast.LENGTH_SHORT).show();
                                 }
                             }
 
                             @Override
                             public void onFailure(Call<User> call, Throwable t) {
-                                Toast.makeText(RegisterActivity.this, "Eroare de rețea!", Toast.LENGTH_SHORT).show();
+
                             }
                         });
                     }else{
-                        Toast.makeText(RegisterActivity.this,"Eroare inregistrare! Numarul de telefon nu poate fi mai mic de 9 cifre",Toast.LENGTH_SHORT).show();
+                     GlobalErrorBus.postError("Numărul de telefon trebuie să aibă cel puțin 9 cifre!");
                     }
                 }
         }

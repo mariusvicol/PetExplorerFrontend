@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -25,12 +25,13 @@ import domain.AnimalPierdut;
 import petexplorer.petexplorerclients.adapters.AnimalAdapter;
 import petexplorer.petexplorerclients.adapters.AnimalUserAdapter;
 import petexplorer.petexplorerclients.notification.WebSocketStompClientManager;
+import petexplorer.petexplorerclients.utils.GlobalErrorBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
 
-public class MyAnnouncementsActivity extends AppCompatActivity {
+public class MyAnnouncementsActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private Button btnVeziPierdute, btnVeziGasite;
@@ -49,7 +50,6 @@ public class MyAnnouncementsActivity extends AppCompatActivity {
         currentUserId = prefs.getInt("user_id", -1);
 
         if (currentUserId == -1) {
-            Toast.makeText(this, "User ID invalid! Nu ești logat!", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
@@ -135,8 +135,7 @@ public class MyAnnouncementsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<AnimalPierdut>> call, Throwable t) {
-                Toast.makeText(MyAnnouncementsActivity.this, "Eroare la conectarea la server", Toast.LENGTH_SHORT).show();
-            }
+                      }
         });
     }
 
@@ -148,18 +147,13 @@ public class MyAnnouncementsActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(MyAnnouncementsActivity.this, "Marcat ca rezolvat", Toast.LENGTH_SHORT).show();
                     animal.setRezolvat(true);
                     updateFilteredList();
-                } else {
-                    Toast.makeText(MyAnnouncementsActivity.this, "Eroare la actualizare", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(MyAnnouncementsActivity.this, "Eroare la conectare", Toast.LENGTH_SHORT).show();
-            }
+            public void onFailure(Call<Void> call, Throwable t) {}
         });
     }
 }

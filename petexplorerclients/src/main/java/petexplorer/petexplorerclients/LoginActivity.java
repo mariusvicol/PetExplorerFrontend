@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -20,12 +20,13 @@ import java.util.Map;
 
 import domain.User;
 import domain.utils.LoginResponse;
+import petexplorer.petexplorerclients.utils.GlobalErrorBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
     private static final int RC_SIGN_IN = 9001;
     private EditText emailEditText, passwordEditText;
     private Button loginButton, googleSignInButton;
@@ -63,7 +64,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(LoginActivity.this, "Completeaza toate campurile!", Toast.LENGTH_SHORT).show();
+            GlobalErrorBus.postError("Completati toate campurile!");
             return;
         }
 
@@ -91,14 +92,12 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                 } else {
-                    Toast.makeText(LoginActivity.this, "Email sau parola greșita!", Toast.LENGTH_SHORT).show();
+                   GlobalErrorBus.postError("Email sau parola incorecte!");
                 }
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Toast.makeText(LoginActivity.this, "Eroare de rețea!", Toast.LENGTH_SHORT).show();
-            }
+            public void onFailure(Call<LoginResponse> call, Throwable t) {}
         });
     }
 
@@ -154,19 +153,16 @@ public class LoginActivity extends AppCompatActivity {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                Toast.makeText(LoginActivity.this, "Eroare la autentificare Google! " + response.code(), Toast.LENGTH_LONG).show();
                                 android.util.Log.e("GoogleSignIn", "Error: " + response.code() + " - " + errorBody);
                             }
                         }
 
                         @Override
                         public void onFailure(Call<LoginResponse> call, Throwable t) {
-                            Toast.makeText(LoginActivity.this, "Eroare de rețea!", Toast.LENGTH_SHORT).show();
                             android.util.Log.e("GoogleSignIn", "Network error", t);
                         }
                     });
                 } else {
-                    Toast.makeText(LoginActivity.this, "Autentificarea Google a eșuat. Te rugăm să încerci din nou.", Toast.LENGTH_SHORT).show();
                     android.util.Log.e("GoogleSignIn", "ID token is null");
                 }
             }
@@ -175,20 +171,25 @@ public class LoginActivity extends AppCompatActivity {
 
             switch (e.getStatusCode()) {
                 case 10:
-                    errorMessage = "Configurare incorectă. Te rugăm să contactezi echipa de suport.";
+                    errorMessage = "Configurare incorectă. " +
+                            "Te rugăm să contactezi echipa de suport.";
                     break;
                 case 12500:
                     errorMessage = "Autentificare anulată.";
                     break;
                 case 7:
-                    errorMessage = "Eroare de conexiune. Verifică conexiunea la internet.";
+                    errorMessage = "Eroare de conexiune." +
+                            " Verifică conexiunea la internet.";
                     break;
                 default:
-                    errorMessage = "Autentificarea a eșuat. Te rugăm să încerci din nou.";
+                    errorMessage = "Autentificarea a eșuat." +
+                            " Te rugăm să încerci din nou.";
             }
 
-            Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
-            android.util.Log.e("GoogleSignIn", "Error code: " + e.getStatusCode() + " - " + e.getMessage(), e);
+            GlobalErrorBus.postError(errorMessage);
+            android.util.Log.e("GoogleSignIn",
+                    "Error code: " + e.getStatusCode() + " - " +
+                            e.getMessage(), e);
         }
     }
 
@@ -202,7 +203,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToMaps() {
-        Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+        Intent intent = new Intent(LoginActivity.this,
+                MapsActivity.class);
         startActivity(intent);
         finish();
     }

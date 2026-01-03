@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
+
 import android.widget.Button;
 import android.widget.ProgressBar;
 import androidx.annotation.DrawableRes;
@@ -37,12 +37,13 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import domain.utils.AiDescriptionResponse;
+import petexplorer.petexplorerclients.utils.GlobalErrorBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
 
-public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class AddAnimalActivity extends BaseActivity implements OnMapReadyCallback {
 
     private GoogleMap map;
     private LatLng selectedLatLng;
@@ -146,16 +147,12 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
                 selectedImageUri = data.getData();
             } else if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
                 selectedImageUri = data.getData();
-                if (selectedImageUri == null && data.getExtras() != null) {
-                    Toast.makeText(this, "Imagine capturată (thumbnail)", Toast.LENGTH_SHORT).show();
-                }
             }
 
             if (selectedImageUri != null) {
                 imagePreview.setImageURI(selectedImageUri);
                 imagePreview.setVisibility(View.VISIBLE);
                 btnGenerateAi.setVisibility(View.VISIBLE);
-                Toast.makeText(this, "Imagine selectată!", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -163,7 +160,6 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
 
     private void submitAnimal() {
         if (selectedLatLng == null) {
-            Toast.makeText(this, "Completează toate câmpurile", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -197,25 +193,19 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
                 public void onResponse(Call<AnimalPierdut> call, Response<AnimalPierdut> response) {
                     if (response.isSuccessful()) {
                         AnimalPierdut animal = response.body();
-                        Toast.makeText(AddAnimalActivity.this, "Animal adăugat: " + animal.getNumeAnimal(), Toast.LENGTH_SHORT).show();
                         Intent resultIntent = new Intent();
                         setResult(RESULT_OK, resultIntent);
                         finish();
 
-                    } else {
-                        Toast.makeText(AddAnimalActivity.this, "Eroare la trimitere", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
-                public void onFailure(Call<AnimalPierdut> call, Throwable t) {
-                    Toast.makeText(AddAnimalActivity.this, "Eroare rețea: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
+                public void onFailure(Call<AnimalPierdut> call, Throwable t) {}
             });
 
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Eroare la procesarea fișierului", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -238,7 +228,6 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
         return tempFile;
     }
 
-
     private String getTextFromField(int fieldId) {
         EditText field = findViewById(fieldId);
         return field.getText().toString().trim();
@@ -260,7 +249,6 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
 
     private void generateAiDescription() {
         if (selectedImageUri == null) {
-            Toast.makeText(this, "Te rog selectează o imagine mai întâi!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -291,10 +279,8 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
                         AiDescriptionResponse aiResponse = response.body();
                         if ("success".equals(aiResponse.getStatus()) && aiResponse.getDescription() != null) {
                             editDescriere.setText(aiResponse.getDescription());
-                            Toast.makeText(AddAnimalActivity.this, "Descriere generată cu succes!", Toast.LENGTH_SHORT).show();
                         } else {
                             String errorMsg = aiResponse.getMessage() != null ? aiResponse.getMessage() : "Eroare necunoscută";
-                            Toast.makeText(AddAnimalActivity.this, "Eroare: " + errorMsg, Toast.LENGTH_LONG).show();
                         }
                     } else {
                         String errorMsg = "Eroare la generarea descrierii (Cod: " + response.code() + ")";
@@ -305,7 +291,6 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        Toast.makeText(AddAnimalActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                     }
                 }
 
@@ -315,7 +300,6 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
                     editDescriere.setEnabled(true);
                     btnSubmit.setEnabled(true);
                     String errorMsg = "Eroare rețea: " + (t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName());
-                    Toast.makeText(AddAnimalActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                     t.printStackTrace();
                 }
             });
@@ -325,7 +309,6 @@ public class AddAnimalActivity extends AppCompatActivity implements OnMapReadyCa
             editDescriere.setEnabled(true);
             btnSubmit.setEnabled(true);
             e.printStackTrace();
-            Toast.makeText(this, "Eroare la procesarea imaginii", Toast.LENGTH_SHORT).show();
         }
     }
 }

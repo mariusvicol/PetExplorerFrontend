@@ -8,7 +8,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
-public class IntroActivity extends AppCompatActivity {
+public class IntroActivity extends BaseActivity {
 
     protected Button loginOptionBtn, registerOptionBtn;
 
@@ -29,8 +29,6 @@ public class IntroActivity extends AppCompatActivity {
         loginOptionBtn.setOnClickListener(v -> onLoginOptionChosen());
         registerOptionBtn.setOnClickListener(v -> onRegisterOptionChosen());
     }
-
-
 
     private void onLoginOptionChosen() {
         Intent intent = new Intent(IntroActivity.this, LoginActivity.class);

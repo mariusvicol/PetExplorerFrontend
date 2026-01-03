@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,12 +25,14 @@ import java.util.List;
 
 import domain.PetSittingOffer;
 import petexplorer.petexplorerclients.adapters.PetSittingOfferAdapter;
+import petexplorer.petexplorerclients.utils.GlobalErrorBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import service.ApiService;
 
-public class PetSittingActivity extends AppCompatActivity implements PetSittingOfferAdapter.OnOfferClickListener {
+public class PetSittingActivity extends BaseActivity
+        implements PetSittingOfferAdapter.OnOfferClickListener {
 
 	private RecyclerView recyclerView;
 	private PetSittingOfferAdapter adapter;
@@ -107,15 +109,12 @@ public class PetSittingActivity extends AppCompatActivity implements PetSittingO
 				if (response.isSuccessful() && response.body() != null) {
 					List<PetSittingOffer> items = response.body();
 					adapter.setItems(items);
-				} else {
-					Toast.makeText(PetSittingActivity.this, "Eroare la încărcarea ofertelor", Toast.LENGTH_SHORT).show();
 				}
 			}
 
 			@Override
 			public void onFailure(Call<List<PetSittingOffer>> call, Throwable t) {
 				showLoading(false);
-				Toast.makeText(PetSittingActivity.this, "Eroare rețea", Toast.LENGTH_SHORT).show();
 			}
 		});
 	}
@@ -133,7 +132,6 @@ public class PetSittingActivity extends AppCompatActivity implements PetSittingO
 		String phone = phoneEdit.getText().toString();
 
 		if (TextUtils.isEmpty(name) || TextUtils.isEmpty(location) || TextUtils.isEmpty(phone)) {
-			Toast.makeText(this, "Completează nume, locație și telefon", Toast.LENGTH_SHORT).show();
 			return;
 		}
 
@@ -150,19 +148,14 @@ public class PetSittingActivity extends AppCompatActivity implements PetSittingO
 			@Override
 			public void onResponse(Call<PetSittingOffer> call, Response<PetSittingOffer> response) {
 				if (response.isSuccessful()) {
-					Toast.makeText(PetSittingActivity.this, "Ofertă salvată", Toast.LENGTH_SHORT).show();
 					clearForm();
 					toggleForm(false);
 					loadOffers();
-				} else {
-					Toast.makeText(PetSittingActivity.this, "Eroare la salvare", Toast.LENGTH_SHORT).show();
 				}
 			}
 
 			@Override
-			public void onFailure(Call<PetSittingOffer> call, Throwable t) {
-				Toast.makeText(PetSittingActivity.this, "Eroare rețea", Toast.LENGTH_SHORT).show();
-			}
+			public void onFailure(Call<PetSittingOffer> call, Throwable t) {}
 		});
 	}
 
@@ -204,17 +197,12 @@ public class PetSittingActivity extends AppCompatActivity implements PetSittingO
 					@Override
 					public void onResponse(Call<Void> call, Response<Void> response) {
 						if (response.isSuccessful()) {
-							Toast.makeText(PetSittingActivity.this, "Ofertă ștearsă", Toast.LENGTH_SHORT).show();
 							dialog.dismiss();
 							loadOffers();
-						} else {
-							Toast.makeText(PetSittingActivity.this, "Eroare la ștergere", Toast.LENGTH_SHORT).show();
 						}
 					}
 					@Override
-					public void onFailure(Call<Void> call, Throwable t) {
-						Toast.makeText(PetSittingActivity.this, "Eroare rețea", Toast.LENGTH_SHORT).show();
-					}
+					public void onFailure(Call<Void> call, Throwable t) {}
 				});
 			});
 		} else {
