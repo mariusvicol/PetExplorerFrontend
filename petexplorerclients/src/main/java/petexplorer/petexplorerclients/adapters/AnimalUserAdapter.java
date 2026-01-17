@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -64,6 +65,8 @@ public class AnimalUserAdapter extends RecyclerView.Adapter<AnimalUserAdapter.An
         TextView tvNume, tvData, tvDescriere, tvTelefon, tvRezolvat;
         ImageView imgPoza;
         Button btnRezolvat;
+        ImageButton btnExpandDescriere;
+        boolean isExpanded = false;
 
         public AnimalUserViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,6 +77,7 @@ public class AnimalUserAdapter extends RecyclerView.Adapter<AnimalUserAdapter.An
             imgPoza = itemView.findViewById(R.id.imgPoza);
             btnRezolvat = itemView.findViewById(R.id.btnMarkResolved);
             tvRezolvat = itemView.findViewById(R.id.tvRezolvat);
+            btnExpandDescriere = itemView.findViewById(R.id.btnExpandDescriere);
         }
 
         public void bind(AnimalPierdut animal, OnResolveClickListener resolveClickListener) {
@@ -95,6 +99,23 @@ public class AnimalUserAdapter extends RecyclerView.Adapter<AnimalUserAdapter.An
             tvData.setText(dataFormatted);
             tvDescriere.setText(animal.getDescriere());
             tvTelefon.setText(animal.getNrTelefon());
+
+            // Reset expand state
+            isExpanded = false;
+            tvDescriere.setMaxLines(2);
+            btnExpandDescriere.setRotation(0);
+
+            // Handle expand/collapse button
+            btnExpandDescriere.setOnClickListener(v -> {
+                isExpanded = !isExpanded;
+                if (isExpanded) {
+                    tvDescriere.setMaxLines(Integer.MAX_VALUE);
+                    btnExpandDescriere.setRotation(180);
+                } else {
+                    tvDescriere.setMaxLines(2);
+                    btnExpandDescriere.setRotation(0);
+                }
+            });
 
             if (animal.getPoza() != null && !animal.getPoza().isEmpty()) {
                 String imageUrl = ServerConfig.BASE_URL + animal.getPoza();
