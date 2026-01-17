@@ -19,6 +19,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -108,7 +109,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         initializeFavoritePlacesMap(); // sa n-o incarc de fiecare data
 
+        stompClientManager = WebSocketStompClientManager.getInstance(this);
+        stompClientManager.connect(currentUserId);
+
+        // pentru monitorizarea locatiei
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        setupLocationUpdates();
         getLastLocation();
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
@@ -175,6 +181,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startLocationUpdates();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper());
+            Log.d(TAG, "Location updates started.");
+        }
+    }
+
+    private void stopLocationUpdates() {
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        Log.d(TAG, "Location updates stopped.");
+    }
 
     private void showBottomSheet() {
         FiltrareBottomSheetFragment bottomSheet = new FiltrareBottomSheetFragment();
@@ -1013,32 +1044,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void sendLocationToServer(Location location) {
-        if (currentUserId == -1) {
-            return;
-        }
+        if (currentUserId == -1) return;
 
         UserLocationDTO locationDTO = new UserLocationDTO(location.getLatitude(), location.getLongitude());
         ApiService apiService = RetrofitClient.getApiService();
+
         apiService.updateUserLocation(currentUserId, locationDTO).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Log.d(TAG, "Locația a fost trimisă cu succes la server.");
-                    stompClient
+                    Log.d(TAG, "Serverul a actualizat locația. Trecem pe topicul local.");
+                    // ne schimbam pe topicul privat
+                    stompClientManager.subscribeToPrivate();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Log.d(TAG, "Eroare la trimiterea locației la server: " + t.getMessage());
+                Log.e(TAG, "Eroare trimitere locatie: " + t.getMessage());
             }
         });
     }
 
     private void setupLocationUpdates() {
-        locationRequest = new LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 60000) // check interval (1 minute)
-                .setMinUpdateDistanceMeters(500)
-                .setWaitForAccurateLocation(false)
+        locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 60000) // check interval (1 minute)
+                .setMinUpdateDistanceMeters(100)
                 .build();
 
         locationCallback = new LocationCallback() {
@@ -1053,7 +1083,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     // send location to server
                     sendLocationToServer(location);
-                    Log.d(TAG, "Locație nouă detectată (peste 500m): " + location.getLatitude() + ", " + location.getLongitude());
+                    Log.d(TAG, "Locatie noua detectata (peste 100 m): " + location.getLatitude() + ", " + location.getLongitude());
                 }
             }
         };
